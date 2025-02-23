@@ -1,0 +1,19 @@
+.home-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+    text-align: center;
+  }
+  
+  .home-page h1 {
+    font-size: 3rem;
+    color: #333;
+  }
+  
+  .home-page p {
+    font-size: 1.2rem;
+    color: #666;
+  }
