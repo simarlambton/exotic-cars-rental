@@ -1,42 +1,48 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import './Signup.css';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "./Signup.css";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     // Validation
     if (!fullName || !email || !password) {
-      setError('Please fill in all fields.');
+      setError("Please fill in all fields.");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address.');
+      setError("Please enter a valid email address.");
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', {
-        fullName,
-        email,
-        password,
-      });
-      setSuccess('Signup successful! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000); // Redirect to Login Page after 2 seconds
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/signup",
+        {
+          fullName,
+          email,
+          password,
+        }
+      );
+      setSuccess("Signup successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000); // Redirect to Login Page after 2 seconds
     } catch (err) {
-      setError(err.response?.data?.error || 'Error creating account. Please try again.');
+      setError(
+        err.response?.data?.error || "Error creating account. Please try again."
+      );
     }
   };
 
@@ -70,7 +76,7 @@ const Signup = () => {
         <button type="submit">Signup</button>
       </form>
       <p>
-        Already have an account? <a href="/login">Login</a>
+        Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>
   );

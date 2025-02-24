@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import './Login.css';
 
 const Login = () => {
@@ -22,9 +22,9 @@ const Login = () => {
 
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('token', res.data.token); // Store token in localStorage
       setSuccess('Login successful! Redirecting...');
-      setTimeout(() => navigate('/home'), 2000); 
+      setTimeout(() => navigate('/home'), 2000); // Redirect to Home Page after 2 seconds
     } catch (err) {
       setError('Invalid email or password.');
     }
@@ -53,7 +53,10 @@ const Login = () => {
         <button type="submit">Login</button>
       </form>
       <p>
-        Don't have an account? <a href="/signup">Signup</a>
+        Don't have an account? <Link to="/signup">Signup</Link>
+      </p>
+      <p>
+        <Link to="/forgot-password">Forgot Password?</Link> {/* Forgot Password Link */}
       </p>
     </div>
   );

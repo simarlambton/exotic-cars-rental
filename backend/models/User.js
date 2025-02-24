@@ -5,6 +5,8 @@ const UserSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  passwordResetToken: { type: String }, // JWT for password reset
+  passwordResetExpires: { type: Date }, // Expiry time for the token
 });
 
 UserSchema.pre('save', async function (next) {

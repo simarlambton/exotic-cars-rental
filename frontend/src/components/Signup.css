@@ -30,7 +30,7 @@
   margin-top: 20px;
   padding: 10px;
   font-size: 1rem;
-  background-color: #007bff;
+  background-color: black;
   color: white;
   border: none;
   border-radius: 5px;
@@ -38,7 +38,7 @@
 }
 
 .signup-page button:hover {
-  background-color: #0056b3;
+  opacity: .8;
 }
 
 .error {
