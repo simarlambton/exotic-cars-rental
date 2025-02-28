@@ -1,0 +1,44 @@
+# Ignore the .env file (contains sensitive data)
+.env
+
+# Ignore node_modules (dependencies)
+node_modules/
+
+# Ignore build/output directories
+dist/
+build/
+out/
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore npm/yarn cache
+.npm
+.yarn
+.yarn-cache
+
+# Ignore dependency lock files (optional)
+package-lock.json
+yarn.lock
+
+# Ignore local development files
+.env.local
+.env.development
+.env.test
+
+# Ignore coverage reports
+coverage/
+.nyc_output/
+
+# Ignore debugging files
+*.pid
+*.seed
