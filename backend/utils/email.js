@@ -1,28 +1,43 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail', 
-  auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASSWORD, 
-  },
-});
+const sendEmail = async (to, subject, text) => {
+  // Validate environment variables
+  if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_FROM) {
+    console.error('Error: Missing required environment variables (SENDGRID_API_KEY or EMAIL_FROM).');
+    return;
+  }
 
-const sendEmail = (to, subject, text) => {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    text,
+  // Validate email parameters
+  if (!to || !subject || !text) {
+    console.error('Error: Missing required email parameters (to, subject, or text).');
+    return;
+  }
+
+  const data = {
+    personalizations: [
+      {
+        to: [{ email: to }],
+        subject: subject,
+      },
+    ],
+    from: { email: process.env.EMAIL_FROM },
+    content: [{ type: 'text/plain', value: text }],
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
-  });
+  try {
+    const response = await axios.post('https://api.sendgrid.com/v3/mail/send', data, {
+      headers: {
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Email sent successfully:', response.status);
+    return { success: true, status: response.status, data: response.data };
+  } catch (error) {
+    console.error('Error sending email:', error.response ? error.response.data : error.message);
+    return { success: false, error: error.response ? error.response.data : error.message };
+  }
 };
 
 module.exports = sendEmail;
