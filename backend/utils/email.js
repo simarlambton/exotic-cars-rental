@@ -7,7 +7,7 @@ const sendEmail = async (to, subject, text) => {
     return;
   }
 
-  // Validate email parameters
+  // Validate email parameters of the send email
   if (!to || !subject || !text) {
     console.error('Error: Missing required email parameters (to, subject, or text).');
     return;
