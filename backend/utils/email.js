@@ -1,11 +1,11 @@
 const axios = require('axios');
 
 const sendEmail = async (to, subject, text) => {
-  // // Validate environment variables
-  // if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_FROM) {
-  //   console.error('Error: Missing required environment variables (SENDGRID_API_KEY or EMAIL_FROM).');
-  //   return;
-  // }
+  // Validate environment variables
+  if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_FROM) {
+    console.error('Error: Missing required environment variables (SENDGRID_API_KEY or EMAIL_FROM).');
+    return;
+  }
 
   // Validate email parameters
   if (!to || !subject || !text) {
@@ -27,7 +27,7 @@ const sendEmail = async (to, subject, text) => {
   try {
     const response = await axios.post('https://api.sendgrid.com/v3/mail/send', data, {
       headers: {
-        Authorization: `Bearer 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`,
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
         'Content-Type': 'application/json',
       },
     });
