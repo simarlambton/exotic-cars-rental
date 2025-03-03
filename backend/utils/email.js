@@ -1,42 +1,30 @@
-const axios = require('axios');
+const axios = require("axios");
 
 const sendEmail = async (to, subject, text) => {
-  // Validate environment variables
   if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_FROM) {
-    console.error('Error: Missing required environment variables (SENDGRID_API_KEY or EMAIL_FROM).');
-    return;
-  }
-
-  // Validate email parameters of the send email
-  if (!to || !subject || !text) {
-    console.error('Error: Missing required email parameters (to, subject, or text).');
-    return;
+    console.error("SendGrid API key or email sender address is missing.");
+    return { success: false, error: "Missing API key or sender email" };
   }
 
   const data = {
-    personalizations: [
-      {
-        to: [{ email: to }],
-        subject: subject,
-      },
-    ],
+    personalizations: [{ to: [{ email: to }], subject }],
     from: { email: process.env.EMAIL_FROM },
-    content: [{ type: 'text/plain', value: text }],
+    content: [{ type: "text/plain", value: text }],
   };
 
   try {
-    const response = await axios.post('https://api.sendgrid.com/v3/mail/send', data, {
+    const response = await axios.post("https://api.sendgrid.com/v3/mail/send", data, {
       headers: {
         Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
-    console.log('Email sent successfully:', response.status);
-    return { success: true, status: response.status, data: response.data };
+    console.log("Email sent successfully");
+    return { success: true, status: response.status };
   } catch (error) {
-    console.error('Error sending email:', error.response ? error.response.data : error.message);
-    return { success: false, error: error.response ? error.response.data : error.message };
+    console.error("Error sending email:", error.response?.data || error.message);
+    return { success: false, error: error.response?.data || error.message };
   }
 };
 

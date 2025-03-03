@@ -1,25 +1,39 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import Home from './components/Home';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/protected/ProtectedRoute";
+import RedirectIfAuth from "./components/protected/RedirectIfAuth";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
+import Login from "./components/auth/Login";
+import Signup from "./components/auth/Signup";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
+import Home from "./components/pages/Home";
+import LandingPage from "./components/pages/LandingPage";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Landing Page without Navbar & Footer */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Public Routes (Only accessible when NOT logged in) */}
+          <Route element={<RedirectIfAuth />}>
+            <Route path="/login" element={<><Navbar /><Login /><Footer /></>} />
+            <Route path="/signup" element={<><Navbar /><Signup /><Footer /></>} />
+            <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /><Footer /></>} />
+            <Route path="/reset-password/:token" element={<><Navbar /><ResetPassword /><Footer /></>} /> {/* ✅ Corrected Route */}
+          </Route>
+
+          {/* Protected Routes (Only accessible when logged in) */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/home" element={<><Navbar /><Home /><Footer /></>} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
