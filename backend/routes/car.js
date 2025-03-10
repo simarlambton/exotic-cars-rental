@@ -3,10 +3,10 @@ const Car = require("../models/Car");
 
 const router = express.Router();
 
-// ✅ Fetch all cars
+//  Fetch all cars
 router.get("/", async (req, res) => {
     try {
-        const cars = await Car.find(); // ✅ Fetch all cars from MongoDB
+        const cars = await Car.find(); 
         res.json(cars);
     } catch (err) {
         console.error("Error fetching cars:", err);
@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-// ✅ Search cars by name or brand
+//  Search cars by name or brand
 router.get("/search", async (req, res) => {
     try {
         const { query } = req.query;

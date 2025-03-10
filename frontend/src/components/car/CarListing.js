@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from "react";
 import CarCard from "./CarCard";
-import "../../styles/CarListing.css"; // ✅ Import CSS
+import "../../styles/CarListing.css"; // Import CSS
 
 const CarListing = () => {
     const [cars, setCars] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    // ✅ Fetch cars from API with debugging logs
+    // Fetch cars from API with debugging logs
     useEffect(() => {
         fetch("http://localhost:5000/api/cars")
             .then((res) => res.json())
             .then((data) => {
-                console.log("Fetched Cars:", data); // ✅ Debugging Log
+                console.log("Fetched Cars:", data); //  Debugging Log
                 setCars(data);
             })
             .catch((err) => console.error("Error fetching cars:", err));
     }, []);
 
-    // ✅ Handle search input
+    //  Handle search input
     const handleSearch = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
@@ -32,7 +32,7 @@ const CarListing = () => {
         <div className="car-listing-container">
             <h2 className="page-title">Available Cars</h2>
 
-            {/* ✅ Search Input */}
+            {/*  Search Input */}
             <input
                 type="text"
                 placeholder="Search by brand or name..."
@@ -41,7 +41,7 @@ const CarListing = () => {
                 className="search-bar"
             />
 
-            {/* ✅ Car Listings */}
+            {/*  Car Listings */}
             <div className="car-list">
                 {cars.length > 0 ? (
                     cars.map((car) => <CarCard key={car._id} car={car} />)
