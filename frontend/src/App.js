@@ -10,7 +10,7 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import Home from "./components/pages/Home";
 import LandingPage from "./components/pages/LandingPage";
-import CarListing from "./components/car/CarListing";
+import CarListing from "./components/car/CarListing"; // ✅ Import Car Listing Page
 
 function App() {
   return (
@@ -22,72 +22,18 @@ function App() {
 
           {/* Public Routes (Only accessible when NOT logged in) */}
           <Route element={<RedirectIfAuth />}>
-            <Route
-              path="/login"
-              element={
-                <>
-                  <Navbar />
-                  <Login />
-                  <Footer />
-                </>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <>
-                  <Navbar />
-                  <Signup />
-                  <Footer />
-                </>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <>
-                  <Navbar />
-                  <ForgotPassword />
-                  <Footer />
-                </>
-              }
-            />
-            <Route
-              path="/reset-password/:token"
-              element={
-                <>
-                  <Navbar />
-                  <ResetPassword />
-                  <Footer />
-                </>
-              }
-            />{" "}
+            <Route path="/login" element={<><Navbar /><Login /><Footer /></>} />
+            <Route path="/signup" element={<><Navbar /><Signup /><Footer /></>} />
+            <Route path="/forgot-password" element={<><Navbar /><ForgotPassword /><Footer /></>} />
+            <Route path="/reset-password/:token" element={<><Navbar /><ResetPassword /><Footer /></>} />
           </Route>
 
-          {/*  Car Listings Page (Public) */}
-          <Route
-            path="/cars"
-            element={
-              <>
-                <Navbar />
-                <CarListing />
-                <Footer />
-              </>
-            }
-          />
+          {/* ✅ Car Listings Page (Public) */}
+          <Route path="/cars" element={<><Navbar /><CarListing /><Footer /></>} />
 
           {/* Protected Routes (Only accessible when logged in) */}
           <Route element={<ProtectedRoute />}>
-            <Route
-              path="/home"
-              element={
-                <>
-                  <Navbar />
-                  <Home />
-                  <Footer />
-                </>
-              }
-            />
+            <Route path="/home" element={<><Navbar /><Home /><Footer /></>} />
           </Route>
         </Routes>
       </Router>

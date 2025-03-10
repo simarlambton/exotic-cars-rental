@@ -3,17 +3,18 @@ const Car = require("../models/Car");
 
 const router = express.Router();
 
-// Fetch all cars
+// ✅ Fetch all cars
 router.get("/", async (req, res) => {
     try {
-        const cars = await Car.find();
+        const cars = await Car.find(); // ✅ Fetch all cars from MongoDB
         res.json(cars);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Error fetching cars:", err);
+        res.status(500).json({ message: "Error fetching cars" });
     }
 });
 
-// Search cars by name or brand
+// ✅ Search cars by name or brand
 router.get("/search", async (req, res) => {
     try {
         const { query } = req.query;
@@ -22,9 +23,9 @@ router.get("/search", async (req, res) => {
         });
         res.json(cars);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Error searching cars:", err);
+        res.status(500).json({ message: "Error searching cars" });
     }
 });
-
 
 module.exports = router;
