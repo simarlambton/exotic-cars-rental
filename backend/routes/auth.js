@@ -7,13 +7,13 @@ const sendEmail = require("../utils/email");
 
 // Signup
 router.post("/signup", async (req, res) => {
-  const { fullName, email, password, licenseNumber } = req.body;
+  const { fullName, email, password } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ error: "User already exists" });
 
-    const user = new User({ fullName, email, password, licenseNumber });
+    const user = new User({ fullName, email, password });
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {

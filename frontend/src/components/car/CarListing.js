@@ -8,7 +8,7 @@ const CarListing = () => {
 
     // Fetch cars from API with debugging logs
     useEffect(() => {
-        fetch("http://localhost:5000/api/cars")
+        fetch("http://localhost:3030/api/cars")
             .then((res) => res.json())
             .then((data) => {
                 console.log("Fetched Cars:", data); //  Debugging Log
@@ -22,7 +22,7 @@ const CarListing = () => {
         const query = e.target.value;
         setSearchQuery(query);
 
-        fetch(`http://localhost:5000/api/cars/search?query=${query}`)
+        fetch(`http://localhost:3030/api/cars/search?query=${query}`)
             .then((res) => res.json())
             .then((data) => setCars(data))
             .catch((err) => console.error("Error fetching search results:", err));
