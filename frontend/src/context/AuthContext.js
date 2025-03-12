@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = (token) => {
     localStorage.setItem("token", token);
-    setUser({ token }); // ✅ Ensure user state updates
+    setUser({ token }); 
   };
 
   const logout = () => {
