@@ -10,12 +10,10 @@ const CarListing = () => {
     useEffect(() => {
         fetch("http://localhost:3030/api/cars")
             .then((res) => res.json())
-            .then((data) => {
-                console.log("Fetched Cars:", data); //  Debugging Log
-                setCars(data);
-            })
-            .catch((err) => console.error("Error fetching cars:", err));
+            .then((data) => setCars(data))
+            .catch((error) => console.error("Error fetching cars:", error));
     }, []);
+    
 
     //  Handle search input
     const handleSearch = (e) => {
