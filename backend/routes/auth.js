@@ -5,26 +5,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/email");
 
-// Signup
-router.post("/signup", async (req, res) => {
-  const { fullName, email, password } = req.body;
-
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ error: "User already exists" });
-
-    const user = new User({ fullName, email, password });
-    await user.save();
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Error signing up" });
-  }
-});
-
-// Login
+// -------------------------------
+// User & Admin Login Route
+// -------------------------------
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
@@ -32,24 +17,55 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ token });
+    const token = jwt.sign(
+      { userId: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({ token, isAdmin: user.isAdmin });
   } catch (err) {
     res.status(500).json({ error: "Error logging in" });
   }
 });
 
-// Forgot Password
+// -------------------------------
+// Register User Route (Signup)
+// -------------------------------
+router.post("/signup", async (req, res) => {
+  const { name, email, password, isAdmin } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ error: "User already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      isAdmin: isAdmin || false // Default to user role if not provided
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Error registering user" });
+  }
+});
+
+// -------------------------------
+// Forgot Password Route
+// -------------------------------
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "User not found" });
 
-    if (!process.env.JWT_SECRET) return res.status(500).json({ error: "JWT_SECRET is missing in .env" });
+    if (!process.env.JWT_SECRET)
+      return res.status(500).json({ error: "JWT_SECRET is missing in .env" });
 
-    // Generate JWT for password reset
+    // Generate JWT for password reset (expires in 1 hour)
     const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     await User.updateOne(
@@ -57,7 +73,7 @@ router.post("/forgot-password", async (req, res) => {
       {
         $set: {
           passwordResetToken: resetToken,
-          passwordResetExpires: Date.now() + 3600000, 
+          passwordResetExpires: Date.now() + 3600000, // 1 hour from now
         },
       }
     );
@@ -77,8 +93,9 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-
-// Reset Password
+// -------------------------------
+// Reset Password Route
+// -------------------------------
 router.post("/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -114,7 +131,7 @@ router.post("/reset-password/:token", async (req, res) => {
           passwordResetExpires: undefined,
         },
       },
-      { runValidators: false } 
+      { runValidators: false }
     );
 
     res.status(200).json({ message: "Password reset successfully" });
@@ -123,6 +140,5 @@ router.post("/reset-password/:token", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 module.exports = router;
