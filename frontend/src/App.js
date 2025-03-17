@@ -66,7 +66,7 @@ function App() {
             />
           </Route>
 
-          {/* ✅ Car Listings Page (Public) */}
+          {/* ✅ Car Listings Page (Public)*/}
           <Route
             path="/cars"
             element={

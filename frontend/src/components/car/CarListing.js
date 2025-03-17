@@ -5,7 +5,6 @@ import carsData from "../../data/carsData";
 const CarListing = () => {
   const [bookedCar, setBookedCar] = useState(null);
   const [bookingInfo, setBookingInfo] = useState({ startDate: "", endDate: "" });
-
   const handleBooking = async (carId) => {
     try {
       const token = localStorage.getItem("token");

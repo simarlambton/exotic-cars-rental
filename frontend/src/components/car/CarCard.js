@@ -11,5 +11,4 @@ const CarCard = ({ car }) => {
         </div>
     );
 };
-
 export default CarCard;
