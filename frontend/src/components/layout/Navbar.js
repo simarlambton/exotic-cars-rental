@@ -1,44 +1,55 @@
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
-// import "bootstrap/dist/css/bootstrap.min.css";
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const { isAuthenticated, logout, isAdmin } = useContext(AuthContext);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container-fluid">
-        <h2 className="navbar-brand" onClick={() => navigate("/home")}>
+      <div className="container">
+        <Link className="navbar-brand" to="/">
           Exotic Cars Rental
-        </h2>
-        <div className="d-flex gap-3">
-          {user ? (
-            <>
-              <button onClick={handleLogout} className="btn btn-danger">
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => navigate("/login")} className="btn btn-primary">
-                Login
-              </button>
-              <button onClick={() => navigate("/signup")} className="btn btn-success">
-                Signup
-              </button>
-            </>
-          )}
+        </Link>
+
+        <div className="collapse navbar-collapse">
+          <ul className="navbar-nav ms-auto">
+            
+            {/* ✅ Show Admin Dashboard only for admins */}
+            {isAuthenticated && isAdmin && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin-dashboard">
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
+
+            {/* ✅ Hide Login/Signup when authenticated */}
+            {!isAuthenticated ? (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">
+                    Login
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/signup">
+                    Signup
+                  </Link>
+                </li>
+              </>
+            ) : (
+              // ✅ Show Logout when authenticated
+              <li className="nav-item">
+                <button className="btn btn-danger" onClick={logout}>
+                  Logout
+                </button>
+              </li>
+            )}
+          </ul>
         </div>
       </div>
     </nav>
   );
 };
-
 export default Navbar;

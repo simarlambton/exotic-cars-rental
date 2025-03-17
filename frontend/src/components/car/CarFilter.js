@@ -5,7 +5,6 @@ import CarFilter from "./CarFilter";
 const CarListing = () => {
     const [cars, setCars] = useState([]);
     const [filters, setFilters] = useState({});
-
     // Fetch cars from API with applied filters
     const fetchCars = async () => {
         try {

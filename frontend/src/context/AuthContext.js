@@ -3,25 +3,35 @@ import { createContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) setUser({ token });
-  }, []);
-
-  const login = (token) => {
-    localStorage.setItem("token", token);
-    setUser({ token }); 
+    if (token) {
+      try {
+        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode JWT safely
+        setIsAdmin(decodedToken.isAdmin || false);
+      } catch (error) {
+        console.error("Invalid token format:", error);
+        setToken(null);
+        localStorage.removeItem("token");
+      }
+    }
+  }, [token]);
+  const login = (newToken) => {
+    localStorage.setItem("token", newToken);
+    setToken(newToken);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setUser(null);
+    setToken(null);
+    setIsAdmin(false);
+    window.location.href = "/"; // Redirect to home
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ token, isAuthenticated: !!token, isAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,13 +2,13 @@ import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import AuthContext from "../../context/AuthContext";
-import "../../styles/Login.css"; 
+import "../../styles/Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); 
+  const [success, setSuccess] = useState("");
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -19,12 +19,16 @@ const Login = () => {
 
     try {
       const response = await axios.post("http://localhost:3030/api/auth/login", { email, password });
-      login(response.data.token);
+      login(response.data.token, response.data.isAdmin);
       setSuccess("Login successful! Redirecting...");
 
       setTimeout(() => {
-        navigate("/home");
-      }, 2000); 
+        if (response.data.isAdmin) {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/home");
+        }
+      }, 2000);
     } catch (err) {
       setError(err.response?.data?.error || "Error logging in.");
     }
@@ -33,7 +37,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <h2>Login</h2>
-      
+
       {success && <p className="success">{success}</p>}
       {error && <p className="error">{error}</p>}
 
@@ -62,8 +66,6 @@ const Login = () => {
       <p className="forgot-password-link pt-2">
         <Link to="/forgot-password">Forgot Password?</Link>
       </p>
-      
-
     </div>
   );
 };
