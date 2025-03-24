@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 
-const BookingSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  car: { type: mongoose.Schema.Types.ObjectId, ref: "Car", required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
+const bookingSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  carId: { type: mongoose.Schema.Types.ObjectId, ref: "Car" },
+  startDate: Date,
+  endDate: Date,
+  totalPrice: Number,
 }, { timestamps: true });
 
-module.exports = mongoose.model("Booking", BookingSchema);
+module.exports = mongoose.model("Booking", bookingSchema);
