@@ -1,40 +1,63 @@
-import { createContext, useState, useEffect } from "react";
+// src/context/AuthContext.js
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { getProfile, loginUser, logoutUser, registerUser, updateProfile } from "../api/authApi";
 
 const AuthContext = createContext();
 
+export const useAuth = () => useContext(AuthContext);
+
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  const login = async (credentials) => {
+    const res = await loginUser(credentials);
+    localStorage.setItem("token", res.token);
+    const profile = await getProfile();
+    localStorage.setItem("user", JSON.stringify(profile));
+    setUser(profile);
+    return res;
+  };
+
+  const logout = async () => {
+    await logoutUser(); // Optional: server-side logout
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  const register = async (data) => {
+    const res = await registerUser(data);
+    return res;
+  };
+
+  const value = {
+    user,
+    setUser,
+    login,
+    logout,
+    register,
+  };
 
   useEffect(() => {
-    if (token) {
+    const checkAuth = async () => {
       try {
-        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode JWT safely
-        setIsAdmin(decodedToken.isAdmin || false);
-      } catch (error) {
-        console.error("Invalid token format:", error);
-        setToken(null);
-        localStorage.removeItem("token");
+        const profile = await getProfile();
+        setUser(profile);
+        localStorage.setItem("user", JSON.stringify(profile));
+      } catch (err) {
+        setUser(null);
+        localStorage.removeItem("user");
       }
+    };
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      checkAuth();
     }
-  }, [token]);
-  const login = (newToken) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
-  };
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setIsAdmin(false);
-    window.location.href = "/"; // Redirect to home
-  };
-
-  return (
-    <AuthContext.Provider value={{ token, isAuthenticated: !!token, isAdmin, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export default AuthContext;
