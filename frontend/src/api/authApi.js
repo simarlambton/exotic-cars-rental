@@ -1,60 +1,63 @@
-// src/api/authApi.js
-import axios from "axios";
+import axios from './axiosConfig';
 
-const API = axios.create({
-  baseURL: "http://localhost:4000/api",
-  withCredentials: true,
-});
-
-// Attach token to every request if it exists
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// ✅ AUTH
-export const loginUser = async ({ email, password }) => {
-  const res = await API.post("/users/login", { email, password });
+// LOGIN
+export const loginUser = async (credentials) => {
+  const res = await axios.post('/users/login', credentials);
   return res.data;
 };
 
-export const registerUser = async (userData) => {
-  const res = await API.post("/users/register", userData);
+// REGISTER
+export const registerUser = async (data) => {
+  const res = await axios.post('/users/register', data);
   return res.data;
 };
 
+// LOGOUT
 export const logoutUser = async () => {
-  localStorage.removeItem("token");
-  return { message: "Logged out locally" };
+  const res = await axios.post('/users/logout');
+  return res.data;
 };
 
-// ✅ PROFILE
+// PROFILE (GET)
 export const getProfile = async () => {
-  const res = await API.get("/users/profile");
+  const res = await axios.get('/users/profile');
   return res.data;
 };
 
-export const updateProfile = async (userData) => {
-  const res = await API.put("/users/profile", userData);
+// PROFILE (UPDATE)
+export const updateProfile = async (data) => {
+  const res = await axios.put('/users/profile', data);
   return res.data;
 };
 
-// ✅ PASSWORD RESET
+// FORGOT PASSWORD
 export const forgotPassword = async (email) => {
-  const res = await API.post("/users/forgot-password", { email });
+  const res = await axios.post('/users/forgot-password', { email });
   return res.data;
 };
 
+// RESET PASSWORD
 export const resetPassword = async (token, newPassword) => {
-  const res = await API.post(`/users/reset-password/${token}`, { newPassword });
+  const res = await axios.post(`/users/reset-password/${token}`, { newPassword });
   return res.data;
 };
 
-// ✅ ADMIN
+
+
+// DEBUG: Check stored password hash
+export const checkPasswordHash = async (payload) => {
+  const res = await axios.post('/users/debug-password', payload);
+  return res.data;
+};
+
+// ADMIN: Get all users
 export const getAllUsers = async () => {
-  const res = await API.get("/users/all-users");
+  const res = await axios.get('/users/all-users');
+  return res.data;
+};
+
+// ADMIN: dashboard stats
+export const getDashboardStats = async () => {
+  const res = await axios.get("/admin/dashboard");
   return res.data;
 };

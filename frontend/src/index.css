@@ -1,5 +1,246 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f5f5f5;
+  font-family: "Montserrat", sans-serif;
+  background-color: #f8f9fa;
+}
+
+a {
+  text-decoration: none;
+}
+
+.card img {
+  height: auto;
+  object-fit: cover;
+}
+
+.admin-sidebar {
+  background: #343a40;
+  color: white;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.admin-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.admin-sidebar li {
+  margin-bottom: 1rem;
+}
+
+.admin-sidebar a {
+  color: white;
+  text-decoration: none;
+}
+
+.admin-sidebar a:hover {
+  text-decoration: underline;
+}
+
+/* Style for the search bar */
+.search-bar {
+  position: relative;
+  width: 100%;
+}
+
+.search-bar input {
+  padding-right: 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Style for the dropdown filter */
+.dropdown-filter select {
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  width: 100%;
+}
+
+/* Style for the range slider */
+.range-slider {
+  width: 100%;
+}
+
+.range-slider .price-range-display {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+
+.range-slider input {
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Hover effect for car cards */
+.CarCard {
+  transition: transform 0.2s ease;
+}
+
+.CarCard:hover {
+  transform: scale(1.05);
+}
+
+/* Booking Card Styles */
+.booking-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.booking-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.booking-card .card-title {
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.booking-card .badge {
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  border-radius: 5px;
+}
+
+.booking-card .badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.booking-card .badge-warning {
+  background-color: #ffc107;
+  color: white;
+}
+
+/* Button Styles */
+.booking-card button {
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+}
+
+.booking-card button:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Empty State Message */
+.text-center p {
+  font-size: 1.25rem;
+  color: #888;
+}
+
+/* Card Subtitle */
+.card-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* General Styles */
+.input-field {
+  font-size: 1rem;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.input-field:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button Styles */
+button {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Label Styling */
+label {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Toast Styling */
+.toast-message {
+  font-size: 1rem;
+}
+
+nav.navbar img {
+  width: 115px;
+}
+
+  nav.navbar {
+    background-color: rgb(255 255 255 / 0%) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: 0 0px -5px rgba(0, 0, 0, 0.1) !important;
+    padding: 0;
+  }
+
+  a.nav-link {
+    color: black;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  a.nav-link:hover,
+  a.nav-link:focus {
+    color: #0000007a;
+    text-transform: uppercase;
+  }
+
+@media screen and (max-width: 500px) {
+  .carousel-inner img.d-block.w-100 {
+    object-fit: cover;
+    height: 70vh;
+  }
+}
+
+
+nav.navbar {
+  background-color: rgb(255 255 255 / 0%) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 0px -5px rgba(0, 0, 0, 0.1) !important;
+  padding: 0;
+}
+
+.navbar-collapse{
+  text-align: center;
+}
+
+.modal-body label.form-label {
+  text-transform: capitalize;
 }

@@ -1,6 +1,11 @@
-// src/context/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getProfile, loginUser, logoutUser, registerUser, updateProfile } from "../api/authApi";
+import {
+  getProfile,
+  loginUser,
+  logoutUser,
+  registerUser,
+  updateProfile
+} from "../api/authApi";
 
 const AuthContext = createContext();
 
@@ -33,12 +38,20 @@ export const AuthProvider = ({ children }) => {
     return res;
   };
 
+  const updateUser = async (data) => {
+    const res = await updateProfile(data);
+    localStorage.setItem("user", JSON.stringify(res));
+    setUser(res);
+    return res;
+  };
+
   const value = {
     user,
     setUser,
     login,
     logout,
     register,
+    updateUser
   };
 
   useEffect(() => {

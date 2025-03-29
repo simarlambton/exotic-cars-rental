@@ -3,9 +3,9 @@ import { Container } from "react-bootstrap";
 
 const NotFound = () => {
   return (
-    <Container className="text-center my-5">
-      <h1>404</h1>
-      <p>Page Not Found</p>
+    <Container className="mt-5 pt-5 text-center">
+      <h1 className="display-4">404</h1>
+      <p className="lead">Oops! Page not found.</p>
     </Container>
   );
 };

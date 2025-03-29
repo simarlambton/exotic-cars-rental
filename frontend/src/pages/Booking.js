@@ -1,49 +1,40 @@
-// src/pages/Booking.js
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCarById } from "../api/carApi";
-import { createBooking } from "../api/bookingApi";
-import { useAuth } from "../context/AuthContext";
+import { Button, Container, Form } from "react-bootstrap";
+import { getCarById } from "../api/carApi"; // Ensure this API is correctly defined
+import { getCarAvailability } from "../api/bookingApi"; // Use the admin API to get all bookings
 import { toast } from "react-toastify";
-import {
-  Container,
-  Form,
-  Button,
-  Spinner,
-  Modal,
-} from "react-bootstrap";
 
 const Booking = () => {
-  const { id: carId } = useParams();
-  const { user } = useAuth();
+  const { carId } = useParams(); // Get carId from the URL
   const navigate = useNavigate();
 
   const [car, setCar] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [loading, setLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const [isBooked, setIsBooked] = useState(false); // To track if the car is booked for selected dates
 
-  const fetchData = useCallback(async () => {
-    try {
-      const carData = await getCarById(carId);
-      setCar(carData);
-    } catch (err) {
-      toast.error("Failed to fetch car");
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    const fetchCar = async () => {
+      try {
+        const res = await getCarById(carId);
+        setCar(res);
+      } catch (err) {
+        toast.error("Failed to fetch car details");
+      }
+    };
+
+    fetchCar();
   }, [carId]);
 
+  // Calculate total price when startDate or endDate changes
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (startDate && endDate && car) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-  useEffect(() => {
-    if (startDate && endDate && car?.pricePerDay) {
-      const days =
-        (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24) + 1;
       if (days > 0) {
         setTotalPrice(days * car.pricePerDay);
       } else {
@@ -52,88 +43,107 @@ const Booking = () => {
     }
   }, [startDate, endDate, car]);
 
-  const handleConfirm = async () => {
-    try {
-      const bookingData = {
-        userId: user._id,
-        carId,
-        startDate,
-        endDate,
-        totalPrice,
-      };
-      const response = await createBooking(bookingData);
-      const bookingId = response._id;
-      navigate(`/payment/${bookingId}`);
-    } catch (error) {
-      toast.error("Booking failed");
-    }
-  };
+  // Fetch all bookings and check if the selected dates overlap with any existing bookings
+  useEffect(() => {
+    if (startDate && endDate) {
+      const checkAvailability = async () => {
+        try {
+          const bookings = await getCarAvailability(carId, startDate, endDate); // Fetch all bookings from the admin API
+          console.log(bookings);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+          setIsBooked(false);
+          // const isCarBooked = bookings.some((booking) => {
+          //   const bookingStartDate = new Date(booking.startDate);
+          //   const bookingEndDate = new Date(booking.endDate);
+          //   const newStartDate = new Date(startDate);
+          //   const newEndDate = new Date(endDate);
+
+          //   // Check if the selected dates overlap with any existing booking
+          //   return (
+          //     (newStartDate >= bookingStartDate && newStartDate <= bookingEndDate) ||
+          //     (newEndDate >= bookingStartDate && newEndDate <= bookingEndDate)
+          //   );
+          // });
+
+          // setIsBooked(isCarBooked);  // Set the availability status
+        } catch (err) {
+          console.log(err);
+          setIsBooked(true);
+
+          toast.error(
+            err.response?.data?.message || "Failed to check availability"
+          );
+        }
+      };
+
+      checkAvailability();
+    }
+  }, [startDate, endDate, carId]); // Run when startDate, endDate, or carId changes
+
+  // Handle the booking confirmation and payment process
+  const handleProceedToPayment = () => {
     if (!startDate || !endDate) {
-      toast.error("Please select valid dates");
+      toast.error("Please select a valid date range.");
       return;
     }
-    setShowModal(true);
+
+    if (new Date(startDate) > new Date(endDate)) {
+      toast.error("Start date cannot be after end date.");
+      return;
+    }
+
+    if (isBooked) {
+      toast.error("The car is already booked for the selected dates.");
+      return;
+    }
+
+    navigate(
+      `/payment?carId=${carId}&startDate=${startDate}&endDate=${endDate}&totalPrice=${totalPrice}`
+    );
   };
 
-  const minDate = new Date().toISOString().split("T")[0];
-
-  if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
+  if (!car)
+    return <div className="mt-5 pt-5 text-center">Loading car details...</div>;
 
   return (
-    <Container className="my-5" style={{ maxWidth: "600px" }}>
-      <h2>Book {car?.name}</h2>
-      <Form onSubmit={handleSubmit}>
+    <Container className="mt-5 pt-5">
+      <h2>Book: {car.name}</h2>
+      <p>Price per day: ${car.pricePerDay}</p>
+
+      <Form>
         <Form.Group className="mb-3">
           <Form.Label>Start Date</Form.Label>
           <Form.Control
             type="date"
-            min={minDate}
             value={startDate}
+            min={new Date().toISOString().split("T")[0]} // Ensure the user cannot select past dates
             onChange={(e) => setStartDate(e.target.value)}
           />
         </Form.Group>
+
         <Form.Group className="mb-3">
           <Form.Label>End Date</Form.Label>
           <Form.Control
             type="date"
-            min={startDate || minDate}
             value={endDate}
+            min={startDate} // End date must be after the start date
             onChange={(e) => setEndDate(e.target.value)}
           />
         </Form.Group>
 
-        {totalPrice > 0 && (
-          <p className="fw-bold mb-2">Total: ₹ {totalPrice}</p>
-        )}
+        <p>
+          Total Price: <strong>${totalPrice}</strong>
+        </p>
 
-        <Button variant="primary" type="submit">
-          Confirm Booking
+        <Button
+          onClick={handleProceedToPayment}
+          disabled={!startDate || !endDate || totalPrice <= 0 || isBooked}
+        >
+          {isBooked
+            ? "Car is already booked for selected dates"
+            : "Proceed to Payment"}
         </Button>
       </Form>
-
-      {/* Confirmation Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Booking</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Car: {car?.name}</p>
-          <p>Start Date: {startDate}</p>
-          <p>End Date: {endDate}</p>
-          <p>Total Price: ₹ {totalPrice}</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="success" onClick={handleConfirm}>
-            Proceed to Payment
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 };

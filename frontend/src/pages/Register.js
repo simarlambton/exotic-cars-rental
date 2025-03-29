@@ -1,76 +1,107 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "../api/authApi";
-import { Container, Form, Button, Alert } from "react-bootstrap";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Container, Form, Button, Card, InputGroup } from "react-bootstrap";
+import { Eye, EyeOff, Mail } from "lucide-react";
 
 const Register = () => {
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [message, setMessage] = useState(null);
-  const [error, setError] = useState(null);
+  const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const [formData, setFormData] = useState({
+    name: "", email: "", password: "", confirmPassword: ""
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     try {
-      await registerUser(user);
-      setMessage("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 2000);
+      await register(formData);
+      toast.success("Registration successful. Please login.");
+      navigate("/login");
     } catch (err) {
-      setError("Registration failed. Try again with a different email.");
+      toast.error("Registration failed");
     }
   };
 
   return (
-    <Container className="mt-5">
-      <h2>Register</h2>
-      {message && <Alert variant="success">{message}</Alert>}
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Form onSubmit={handleRegister}>
-        <Form.Group className="mb-3">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter your name"
-            value={user.name}
-            onChange={(e) => setUser({ ...user, name: e.target.value })}
-            required
-          />
-        </Form.Group>
+    <Container className="d-flex justify-content-center align-items-center mt-5 pt-5">
+      <Card className="p-4 shadow" style={{ maxWidth: "500px", width: "100%" }}>
+        <h3 className="mb-4 text-center">Create an Account</h3>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              name="name"
+              type="text"
+              placeholder="Full name"
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Enter email"
-            value={user.email}
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
-            required
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Email</Form.Label>
+            <InputGroup>
+              <InputGroup.Text><Mail size={16} /></InputGroup.Text>
+              <Form.Control
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                onChange={handleChange}
+                required
+              />
+            </InputGroup>
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter password"
-            value={user.password}
-            onChange={(e) => setUser({ ...user, password: e.target.value })}
-            required
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Password</Form.Label>
+            <InputGroup>
+              <InputGroup.Text onClick={() => setShowPassword(!showPassword)} style={{ cursor: "pointer" }}>
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </InputGroup.Text>
+              <Form.Control
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                onChange={handleChange}
+                required
+              />
+            </InputGroup>
+          </Form.Group>
 
-        <Button variant="success" type="submit" className="w-100">
-          Register
-        </Button>
-      </Form>
+          <Form.Group className="mb-3">
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              name="confirmPassword"
+              type={showPassword ? "text" : "password"}
+              placeholder="Repeat password"
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
-      <div className="mt-3 text-center">
-        Already have an account? <Link to="/login">Login here</Link>
-      </div>
+          <Button type="submit" variant="dark" className="w-100 mt-2">
+            Register
+          </Button>
+
+          <div className="mt-3 text-center">
+            <span>Already have an account? <Link to="/login">Login</Link></span>
+          </div>
+        </Form>
+      </Card>
     </Container>
   );
 };
