@@ -1,42 +1,35 @@
-// src/api/carApi.js
-import axios from "axios";
+import axios from './axiosConfig';
 
-const API = axios.create({
-  baseURL: "http://localhost:4000/api",
-  withCredentials: true,
-});
-
-// ✅ Get all cars
+// Get all cars
 export const getAllCars = async () => {
-  const res = await API.get("/cars");
+  const res = await axios.get('/cars');
   return res.data;
 };
 
-// ✅ Get car by ID
+// Get single car by ID
 export const getCarById = async (id) => {
-  const res = await API.get(`/cars/${id}`);
+  const res = await axios.get(`/cars/${id}`);
   return res.data;
 };
 
-// ✅ Add car (multipart/form-data with token)
+// Admin: Add new car
 export const addCar = async (formData) => {
-  const token = localStorage.getItem("token");
-  const res = await API.post("/cars", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${token}`,
-    },
+  const res = await axios.post('/cars', formData);
+  return res.data;
+};
+
+// Admin: Delete car
+export const deleteCar = async (id) => {
+  const res = await axios.delete(`/cars/${id}`);
+  return res.data;
+};
+
+// Update an existing car
+export const updateCar = async (id, data) => {
+  const res = await axios.put(`/cars/${id}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
 };
 
-// ✅ Delete car
-export const deleteCar = async (id) => {
-  const token = localStorage.getItem("token");
-  const res = await API.delete(`/cars/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return res.data;
-};
+

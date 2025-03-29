@@ -1,32 +1,43 @@
 import React, { useEffect, useState } from "react";
 import {
-  Container,
-  Form,
-  Button,
-  Row,
-  Col,
-  Table,
-  Image,
-} from "react-bootstrap";
-import { addCar, deleteCar, getAllCars } from "../api/carApi";
+  getAllCars,
+  addCar,
+  deleteCar,
+  updateCar,
+} from "../api/carApi";
+import { Button, Form, Modal, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 const ManageCars = () => {
+  const [cars, setCars] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [form, setForm] = useState({
     name: "",
     brand: "",
     model: "",
+    year: "",
     color: "",
     pricePerDay: "",
+    image: null,
   });
-  const [image, setImage] = useState(null);
-  const [cars, setCars] = useState([]);
+  const [editCarId, setEditCarId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    brand: "",
+    model: "",
+    year: "",
+    color: "",
+    pricePerDay: "",
+    image: "",
+  });
 
+  // Fetch all cars
   const fetchCars = async () => {
     try {
       const data = await getAllCars();
       setCars(data);
-    } catch (err) {
+    } catch (error) {
       toast.error("Failed to load cars");
     }
   };
@@ -35,44 +46,19 @@ const ManageCars = () => {
     fetchCars();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (
-      !form.name ||
-      !form.brand ||
-      !form.model ||
-      !form.color ||
-      !form.pricePerDay ||
-      !image
-    ) {
-      return toast.error("Please fill all fields and upload an image");
-    }
-
+  const handleAddCar = async () => {
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) =>
         formData.append(key, value)
       );
-      formData.append("image", image);
 
       await addCar(formData);
-      toast.success("Car added successfully!");
-      setForm({ name: "", brand: "", model: "", color: "", pricePerDay: "" });
-      setImage(null);
+      toast.success("Car added");
+      setShowAddModal(false);
       fetchCars();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error adding car");
+    } catch (error) {
+      toast.error("Failed to add car");
     }
   };
 
@@ -81,102 +67,57 @@ const ManageCars = () => {
       await deleteCar(id);
       toast.success("Car deleted");
       fetchCars();
-    } catch (err) {
-      toast.error("Error deleting car");
+    } catch (error) {
+      toast.error("Failed to delete car");
+    }
+  };
+
+  const openEditModal = (car) => {
+    setEditCarId(car._id);
+    setEditForm(car);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCar = async () => {
+    try {
+      const formData = new FormData();
+      Object.entries(editForm).forEach(([key, value]) => {
+        if (key === "image" && typeof value !== "string") {
+          formData.append("image", value);
+        } else {
+          formData.append(key, value);
+        }
+      });
+
+      await updateCar(editCarId, formData);
+      toast.success("Car updated successfully");
+      setShowEditModal(false);
+
+      //  REFRESH the list to reflect updated data
+      fetchCars();
+    } catch (error) {
+      toast.error("Failed to update car");
     }
   };
 
   return (
-    <Container className="my-5">
-      <h2>Manage Cars</h2>
+    <div className="container my-5 py-5">
+      <h2 className="mb-4">Manage Cars</h2>
 
-      <Form
-        onSubmit={handleSubmit}
-        encType="multipart/form-data"
-        className="mb-5"
-      >
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Car Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </Form.Group>
+      <Button variant="outline-dark" className="mb-3" onClick={() => setShowAddModal(true)}>
+        Add New Car
+      </Button>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Brand</Form.Label>
-              <Form.Control
-                type="text"
-                name="brand"
-                value={form.brand}
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Model</Form.Label>
-              <Form.Control
-                type="text"
-                name="model"
-                value={form.model}
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </Col>
-
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Color</Form.Label>
-              <Form.Control
-                type="text"
-                name="color"
-                value={form.color}
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Price Per Day ($)</Form.Label>
-              <Form.Control
-                type="number"
-                name="pricePerDay"
-                value={form.pricePerDay}
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Upload Image</Form.Label>
-              <Form.Control
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                required
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Button type="submit" variant="dark">
-          Add Car
-        </Button>
-      </Form>
-
-      <h4>Existing Cars</h4>
-      <Table striped bordered responsive>
+      <Table className="my-5" striped bordered hover responsive>
         <thead>
           <tr>
             <th>Image</th>
             <th>Name</th>
             <th>Brand</th>
             <th>Model</th>
+            <th>Year</th>
             <th>Color</th>
-            <th>$/Day</th>
+            <th>Price/Day</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -184,25 +125,25 @@ const ManageCars = () => {
           {cars.map((car) => (
             <tr key={car._id}>
               <td>
-                <Image
+                <img
                   src={car.image}
-                  width={80}
-                  height={50}
+                  alt={car.name}
+                  width="80"
+                  height="50"
                   style={{ objectFit: "cover" }}
-                  rounded
                 />
               </td>
               <td>{car.name}</td>
               <td>{car.brand}</td>
               <td>{car.model}</td>
+              <td>{car.year}</td>
               <td>{car.color}</td>
-              <td>{car.pricePerDay}</td>
+              <td>${car.pricePerDay}/day</td>
               <td>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => handleDeleteCar(car._id)}
-                >
+                <Button variant="outline-success" size="sm" onClick={() => openEditModal(car)}>
+                  Edit
+                </Button>{" "}
+                <Button variant="outline-danger" size="sm" onClick={() => handleDeleteCar(car._id)}>
                   Delete
                 </Button>
               </td>
@@ -210,7 +151,79 @@ const ManageCars = () => {
           ))}
         </tbody>
       </Table>
-    </Container>
+
+      {/* Add Car Modal */}
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Car</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            {["name", "brand", "model", "year", "color", "pricePerDay"].map((field) => (
+              <Form.Group key={field} className="mb-3">
+                <Form.Label>{field}</Form.Label>
+                <Form.Control
+                  type={field === "pricePerDay" ? "number" : "text"}
+                  value={form[field]}
+                  onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                />
+              </Form.Group>
+            ))}
+            <Form.Group className="mb-3">
+              <Form.Label>Image</Form.Label>
+              <Form.Control
+                type="file"
+                onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleAddCar}>
+            Add
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Edit Car Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Car</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            {["name", "brand", "model", "year", "color", "pricePerDay"].map((field) => (
+              <Form.Group key={field} className="mb-3">
+                <Form.Label>{field}</Form.Label>
+                <Form.Control
+                  type={field === "pricePerDay" ? "number" : "text"}
+                  value={editForm[field]}
+                  onChange={(e) => setEditForm({ ...editForm, [field]: e.target.value })}
+                />
+              </Form.Group>
+            ))}
+            <Form.Group className="mb-3">
+              <Form.Label>Image (leave blank to keep current)</Form.Label>
+              <Form.Control
+                type="file"
+                onChange={(e) => setEditForm({ ...editForm, image: e.target.files[0] })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleUpdateCar}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
   );
 };
 

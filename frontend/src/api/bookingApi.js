@@ -1,45 +1,32 @@
 // src/api/bookingApi.js
-import axios from "axios";
+import axios from './axiosConfig';
 
-const API = axios.create({
-  baseURL: "http://localhost:4000/api/bookings",
-});
-
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Add to src/api/bookingApi.js
-export const getBookingById = async (id) => {
-  const res = await API.get(`/bookings/${id}`);
+export const createBooking = async (data) => {
+  const res = await axios.post('/bookings', data);
   return res.data;
 };
 
-
-// ✅ Create a booking
-export const createBooking = async (bookingData) => {
-  const res = await API.post("/", bookingData);
+export const getMyBookings = async () => {
+  const res = await axios.get('/bookings/my');
   return res.data;
 };
 
-// ✅ Get current user's bookings
-export const getUserBookings = async () => {
-  const res = await API.get("/my");
+export const cancelBooking = async (id) => {
+  const res = await axios.delete(`/bookings/${id}`);
   return res.data;
 };
 
-// ✅ Cancel a booking
-export const cancelBooking = async (bookingId) => {
-  const res = await API.delete(`/${bookingId}`);
-  return res.data;
-};
-
-// ✅ Get all bookings (for admin)
 export const getAllBookings = async () => {
-  const res = await API.get("/all"); // Admin route
+  const res = await axios.get('/bookings/all');
+  return res.data;
+};
+
+export const getBookingById = async (id) => {
+  const res = await axios.get(`/bookings/${id}`);
+  return res.data;
+};
+
+export const getCarAvailability = async (carId, startDate, endDate) => {
+  const res = await axios.get(`/bookings/checkAvailability?carId=${carId}&startDate=${startDate}&endDate=${endDate}`);
   return res.data;
 };

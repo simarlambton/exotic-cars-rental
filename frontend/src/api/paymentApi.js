@@ -1,17 +1,13 @@
-// src/api/paymentApi.js
-import axios from "axios";
+import axios from './axiosConfig';
 
-const API = axios.create({
-  baseURL: "http://localhost:4000/api",
-  withCredentials: true,
-});
-
-export const createPaymentIntent = async (amount) => {
-  const res = await API.post("/payments/create-payment-intent", { amount });
+// Create Stripe payment intent
+export const createPaymentIntent = async (paymentData) => {
+  const res = await axios.post('/payments/create-payment-intent', paymentData);
   return res.data;
 };
 
-export const confirmPayment = async (paymentData) => {
-  const res = await API.post("/payments/confirm", paymentData);
+// Confirm payment
+export const confirmPayment = async (paymentResult) => {
+  const res = await axios.post('/payments/confirm', paymentResult);
   return res.data;
 };

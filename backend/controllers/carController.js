@@ -1,16 +1,16 @@
-// backend/controllers/carController.js
-
 const cloudinary = require("../utils/cloudinary");
 const redisClient = require("../utils/redisClient");
 const multer = require("multer");
 const Car = require("../models/Car");
 
-// ✅ Multer: single image upload middleware
+
+
+// Multer: single image upload middleware
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 exports.uploadSingle = upload.single("image");
 
-// ✅ GET all cars
+// GET all cars (with Redis cache)
 exports.getAllCars = async (req, res) => {
   try {
     const cacheKey = "allCars";
@@ -33,7 +33,7 @@ exports.getAllCars = async (req, res) => {
   }
 };
 
-// ✅ GET car by ID
+// GET car by ID
 exports.getCarById = async (req, res) => {
   try {
     const car = await Car.findById(req.params.id);
@@ -44,10 +44,10 @@ exports.getCarById = async (req, res) => {
   }
 };
 
-// ✅ POST add a car
+// POST add a car
 exports.addCar = async (req, res) => {
   try {
-    const { name, brand, model, color, pricePerDay } = req.body;
+    const { name, brand, model, year, color, pricePerDay } = req.body;
 
     let imageUrl = "";
 
@@ -72,6 +72,7 @@ exports.addCar = async (req, res) => {
       name,
       brand,
       model,
+      year,
       color,
       pricePerDay,
       image: imageUrl,
@@ -87,7 +88,7 @@ exports.addCar = async (req, res) => {
   }
 };
 
-// ✅ DELETE car
+// DELETE car
 exports.deleteCar = async (req, res) => {
   try {
     const car = await Car.findByIdAndDelete(req.params.id);
@@ -99,3 +100,54 @@ exports.deleteCar = async (req, res) => {
     res.status(500).json({ error: "Failed to delete car" });
   }
 };
+
+//  PUT update existing car
+// Add this inside carController.js
+exports.updateCar = async (req, res) => {
+  try {
+    const { name, brand, model, year, color, pricePerDay } = req.body;
+    const carId = req.params.id;
+
+    const car = await Car.findById(carId);
+    if (!car) return res.status(404).json({ error: "Car not found" });
+
+    let imageUrl = car.image; // default to existing image
+
+    if (req.file) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image" },
+          (error, result) => {
+            if (error) return reject(error);
+            return resolve(result.secure_url);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      imageUrl = uploadResult;
+    }
+
+    // Update car fields
+    car.name = name;
+    car.brand = brand;
+    car.model = model;
+    car.year = year;
+    car.color = color;
+    car.pricePerDay = pricePerDay;
+    car.image = imageUrl;
+
+    await car.save();
+
+    // ✅ Clear cache
+    redisClient.del("allCars");
+
+    res.json({ message: "Car updated successfully", car });
+  } catch (error) {
+    console.error("❌ Update Car Error:", error);
+    res.status(500).json({ error: "Failed to update car", details: error.message });
+  }
+};
+
+
+

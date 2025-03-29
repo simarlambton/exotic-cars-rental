@@ -1,102 +1,119 @@
+import { useAuth } from "../context/AuthContext";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCarById, getAllCars } from "../api/carApi";
-import { Tabs, Tab, Button, Spinner } from "react-bootstrap";
-import { FaCheckCircle } from "react-icons/fa";
+import { getCarById } from "../api/carApi";
+import { Container, Button, Row, Col, Image, Card } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext";
 
 const CarDetails = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
-
+  const { id } = useParams(); // Ensure you're correctly retrieving the carId from URL
+  const navigate = useNavigate();
   const [car, setCar] = useState(null);
-  const [otherCars, setOtherCars] = useState([]);
-  const [loading, setLoading] = useState(true);
 
+  // Fetch car details based on carId from URL
   useEffect(() => {
-    const fetchCarDetails = async () => {
+    const fetchCar = async () => {
       try {
-        const carData = await getCarById(id);
-        setCar(carData);
-        const cars = await getAllCars();
-        const filtered = cars.filter((c) => c._id !== id);
-        setOtherCars(filtered.slice(0, 6)); // display 6 other cars
-      } catch (error) {
+        const res = await getCarById(id);
+        setCar(res);
+      } catch (err) {
         toast.error("Failed to load car details");
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchCarDetails();
+    if (id) fetchCar();
   }, [id]);
 
-  if (loading) {
-    return <div className="text-center mt-5"><Spinner animation="border" /></div>;
+  const handleBooking = () => {
+    if (!user) {
+      navigate(`/login`);
+      toast.error("You need to be logged in to book this car!");
+      return;
+    }
+    if (!car) return;
+
+    // Navigate to the booking page for the selected car
+    navigate(`/booking/${car._id}`);
+  };
+
+  if (!car) {
+    return <div className="mt-5 pt-5 text-center">Loading car details...</div>;
   }
 
-  if (!car) return <p>Car not found</p>;
-
   return (
-    <div className="container my-5">
-      <h2>{car.name}</h2>
-      <h4 className="text-primary">${car.pricePerDay} / day</h4>
+    <Container className="mt-5 pt-5">
+      <Row className="align-items-center">
+        <Col md={12}>
+          {/* Car Image */}
+          <Card className="mb-4">
+            <Image src={car.image} fluid rounded />
+          </Card>
 
-      <div className="d-flex flex-wrap my-4">
-        <img src={car.image} alt={car.name} className="img-fluid car-image mb-3 me-3" />
-        <div className="flex-grow-1">
-          <Tabs defaultActiveKey="info" className="mb-3">
-            <Tab eventKey="info" title="General Info">
-              <p><strong>Brand:</strong> {car.brand}</p>
-              <p><strong>Model:</strong> {car.model}</p>
-              <p><strong>Color:</strong> {car.color}</p>
-            </Tab>
-            <Tab eventKey="equipment" title="Car Equipment">
-              <ul className="list-unstyled">
-                <li><FaCheckCircle className="text-success me-2" /> Air Conditioner</li>
-                <li><FaCheckCircle className="text-success me-2" /> ABS</li>
-                <li><FaCheckCircle className="text-success me-2" /> Cruise Control</li>
-              </ul>
-            </Tab>
-            <Tab eventKey="reviews" title="Reviews">
-              <p>This car is very reliable and offers a comfortable ride. ⭐⭐⭐⭐⭐</p>
-            </Tab>
-          </Tabs>
-          {!user?.isAdmin && (
+          {/* Car Information */}
+          <Card className="shadow-lg mb-4">
+            <Card.Body>
+              <h2 className="mb-4">{car.brand} {car.model} {car.year}</h2>
+              {/* <p>
+                <strong>Brand:</strong> 
+              </p>
+              <p>
+                <strong>Model:</strong> 
+              </p>
+              <p>
+                <strong>Year:</strong> 
+              </p> */}
+              <p>
+                <strong>Color:</strong> {car.color}
+              </p>
+              <p>
+                <strong>Price per day:</strong> ${car.pricePerDay}
+              </p>
+              
+            </Card.Body>
+          </Card>
+
+          {/* Book Button and Car Info */}
+          <div className="text-center mb-4">
             <Button
-            variant="primary"
-            className="mt-2"
-            onClick={() => navigate(`/booking/${car._id}`)}
-          >
-            Book This Car
-          </Button>
-          )}
-        </div>
-      </div>
+              onClick={handleBooking}
+              disabled={user?.isAdmin} // Disable for admin users
+              variant="dark"
+              className="w-100 mb-3" // Proper usage of w-100 class name
+            >
+              {user?.isAdmin ? "Admins cannot book this car" : "Book This Car"}
+            </Button>
+          </div>
+        </Col> 
+      </Row>
 
-      {/* Other Cars Section */}
-      <div className="mt-5">
-        <h3>Other Cars</h3>
-        <div className="row">
-          {otherCars.map((carItem) => (
-            <div className="col-md-4 mb-4" key={carItem._id}>
-              <div className="card h-100 shadow-sm">
-                <img src={carItem.image} alt={carItem.name} className="card-img-top" style={{ height: "200px", objectFit: "cover" }} />
-                <div className="card-body">
-                  <h5 className="card-title">{carItem.name}</h5>
-                  <p className="card-text text-primary">${carItem.pricePerDay} / day</p>
-                  <Button variant="outline-primary" size="sm" onClick={() => navigate(`/car/${carItem._id}`)}>
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+       {/* Static Rental Information Section */}
+       <Row className="mt-5">
+        <Col md={12}>
+          <Card className="shadow-lg p-4">
+            <Card.Body>
+              <Card.Title className="mb-5 fw-semibold">Rental Information (Common Across All Cars)</Card.Title>
+              <Row>
+                <Col md={6}>
+                  <p><strong>Rental Duration:</strong> Minimum 1 Day</p>
+                  <p><strong>Insurance:</strong> Standard Insurance Included</p>
+                  <p><strong>Mileage Limit:</strong> 200 km/day (Additional fees for extra mileage)</p>
+                  <p><strong>Fuel Policy:</strong> Full-to-Full</p>
+                  <p><strong>Roadside Assistance:</strong> 24/7 Roadside Assistance Included</p>
+                </Col>
+                <Col md={6}>
+                  <p><strong>Cancellation Policy:</strong> Free cancellation up to 48 hours before pickup</p>
+                  <p><strong>Delivery & Pickup:</strong> Free delivery and pickup within 10 km</p>
+                  <p><strong>Age Requirement:</strong> 21+ (Young Driver Fee applies for drivers under 25)</p>
+                  <p><strong>Security Deposit:</strong> $200 (Refundable)</p>
+                  <p><strong>Payment Methods:</strong> Credit/Debit Cards, PayPal</p>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

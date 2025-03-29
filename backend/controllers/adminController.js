@@ -1,18 +1,25 @@
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 
-//  Admin Dashboard Stats
+const Car = require("../models/Car"); 
+
+// Admin Dashboard Stats
 exports.getDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalBookings = await Booking.countDocuments();
+    const totalCars = await Car.countDocuments(); 
 
     res.status(200).json({
       totalUsers,
-      totalBookings
+      totalBookings,
+      totalCars, 
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch dashboard stats", details: error.message });
+    res.status(500).json({
+      error: "Failed to fetch dashboard stats",
+      details: error.message,
+    });
   }
 };
 

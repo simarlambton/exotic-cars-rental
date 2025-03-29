@@ -11,6 +11,12 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
+const contactRoutes = require("./routes/contactRoutes");
+
+// import "./utils/redisTest.js";
+
+const redisClient = require("./utils/redisTest");
+
 connectDB();
 
 const app = express();
@@ -29,6 +35,8 @@ app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentRoutes);
+
+app.use("/api/contact", contactRoutes);  // Add this route
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🤡 Server running on port ${PORT}`));

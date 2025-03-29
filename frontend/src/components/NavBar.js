@@ -1,9 +1,9 @@
-// src/components/NavBar.js
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import logo from "../assets/logo.png";
 
 const NavigationBar = () => {
   const { user, logout } = useAuth();
@@ -18,7 +18,7 @@ const NavigationBar = () => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" fixed="top" collapseOnSelect>
       <Container>
-        <Navbar.Brand as={Link} to="/">Exotic Cars Rental</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/"><img src={logo} alt="Exotic Cars Rental" /></Navbar.Brand>
         <Navbar.Toggle aria-controls="nav" />
         <Navbar.Collapse id="nav">
           <Nav className="ms-auto">

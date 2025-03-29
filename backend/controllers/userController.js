@@ -6,7 +6,7 @@ const crypto = require("crypto");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// ✅ Register a New User
+//  Register a New User
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -154,6 +154,7 @@ exports.forgotPassword = async (req, res) => {
 };
 
 //  Reset Password
+
 exports.resetPassword = async (req, res) => {
   const { token } = req.params;
   const { newPassword } = req.body;
@@ -177,9 +178,11 @@ exports.resetPassword = async (req, res) => {
 
     res.json({ message: "Password reset successfully" });
   } catch (error) {
+    console.error("❌ Reset password error:", error);
     res.status(500).json({ error: "Server error", details: error.message });
   }
 };
+
 
 //  Debug: Check Hashed Password (Optional)
 exports.checkPasswordHash = async (req, res) => {
@@ -199,3 +202,4 @@ exports.checkPasswordHash = async (req, res) => {
       });
   }
 };
+

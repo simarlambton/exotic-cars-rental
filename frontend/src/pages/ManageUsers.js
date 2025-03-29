@@ -1,38 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { getAllUsers } from "../api/authApi";
-import { useAuth } from "../context/AuthContext";
-import { Container, Table, Spinner } from "react-bootstrap";
+import { Container, Table, Button, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 const ManageUsers = () => {
-  const { user } = useAuth();
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
-      const data = await getAllUsers();
-      setUsers(data);
+      const res = await getAllUsers();
+      setUsers(res);
     } catch (error) {
       toast.error("Failed to load users");
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user?.isAdmin) fetchUsers();
-  }, [user]);
+    fetchData();
+  }, []);
 
-  if (!user?.isAdmin) return <p className="text-center mt-5">Access Denied</p>;
+  const exportCSV = () => {
+    const headers = ["Name", "Email", "Role"];
+    const rows = users.map((u) => [
+      u.name,
+      u.email,
+      u.isAdmin ? "Admin" : "User",
+    ]);
 
-  if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "users.csv";
+    link.click();
+  };
 
   return (
-    <Container className="my-5">
-      <h2>Manage Users</h2>
+    <Container className="mt-5 pt-5 mb-5">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold">Manage Users</h2>
+        <Button variant="success" onClick={exportCSV}>
+          Export to CSV
+        </Button>
+      </div>
+
       <Table striped bordered hover responsive>
-        <thead>
+        <thead className="table-dark">
           <tr>
             <th>Name</th>
             <th>Email</th>
@@ -40,11 +56,15 @@ const ManageUsers = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((u) => (
-            <tr key={u._id}>
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.isAdmin ? "Admin" : "User"}</td>
+          {users.map((user) => (
+            <tr key={user._id}>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td>
+                <Badge bg={user.isAdmin ? "primary" : "secondary"}>
+                  {user.isAdmin ? "Admin" : "User"}
+                </Badge>
+              </td>
             </tr>
           ))}
         </tbody>

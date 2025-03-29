@@ -3,6 +3,7 @@ import { getAllCars } from "../api/carApi";
 import CarCard from "../components/CarCard";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { motion } from "framer-motion";
+import { FaSearch } from "react-icons/fa"; // Search icon
 
 const Cars = () => {
   const [cars, setCars] = useState([]);
@@ -30,7 +31,11 @@ const Cars = () => {
 
     if (searchTerm) {
       results = results.filter((car) =>
-        car.name.toLowerCase().includes(searchTerm.toLowerCase())
+        car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        car.color.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        car.year.toString().includes(searchTerm)
       );
     }
 
@@ -47,42 +52,56 @@ const Cars = () => {
 
   const uniqueBrands = [...new Set(cars.map((car) => car.brand))];
 
+  const handleSearchClick = () => {
+    setSearchTerm(searchTerm);
+  };
+
   return (
-    <Container className="my-5">
-      <h2 className="text-center mb-4">Available Cars</h2>
+    <Container className="my-5 pt-5">
+      <h2 className="text-center my-4">Available Cars</h2>
 
       {/* Filters */}
-      <Row className="mb-4">
+      <Row className="mb-4 row gap-md-0 gap-3">
         <Col md={4}>
-          <Form.Control
-            type="text"
-            placeholder="Search by car name"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="search-bar">
+            <Form.Control
+              type="text"
+              placeholder="Search by car name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="search-icon" onClick={handleSearchClick} />
+          </div>
         </Col>
         <Col md={4}>
-          <Form.Select
-            value={brandFilter}
-            onChange={(e) => setBrandFilter(e.target.value)}
-          >
-            <option value="">Filter by Brand</option>
-            {uniqueBrands.map((brand, index) => (
-              <option key={index} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </Form.Select>
+          <div className="dropdown-filter">
+            <Form.Select
+              value={brandFilter}
+              onChange={(e) => setBrandFilter(e.target.value)}
+            >
+              <option value="">Filter by Brand</option>
+              {uniqueBrands.map((brand, index) => (
+                <option key={index} value={brand}>
+                  {brand}
+                </option>
+              ))}
+            </Form.Select>
+          </div>
         </Col>
         <Col md={4}>
-          <Form.Range
-            min={0}
-            max={1000}
-            step={5}
-            value={priceRange[1]}
-            onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-          />
-          <small>Up to ${priceRange[1]} per day</small>
+          <div className="range-slider">
+            <Form.Label>Price Range</Form.Label>
+            <Form.Range
+              min={0}
+              max={1000}
+              step={5}
+              value={priceRange[1]}
+              onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+            />
+            <div className="price-range-display">
+              <span>Up to ${priceRange[1]}</span>
+            </div>
+          </div>
         </Col>
       </Row>
 
@@ -91,7 +110,6 @@ const Cars = () => {
         {filteredCars.map((car) => (
           <Col md={4} sm={6} xs={12} key={car._id || car.name} className="mb-4">
             <motion.div whileHover={{ scale: 1.02 }}>
-              {/* Optional: Pass key to child if it's mapping inside */}
               <CarCard car={car} />
             </motion.div>
           </Col>
